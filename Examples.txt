@@ -1,0 +1,66 @@
+Example 1 (0x2eA1815B01067f68EF87895E0467A619340d5c8A):
+    - Initially had 371.957836 USD+
+        - usd_holdings_per_address[0x2eA1815B01067f68EF87895E0467A619340d5c8A] = 371.957836
+
+    - Transactions in first loop:
+        - Transferred 371.957836 USD+ to another address
+            - usd_holdings_per_address[0x2eA1815B01067f68EF87895E0467A619340d5c8A] = 371.957836 - 371.957836 = 0
+
+    - Checking LP holdings before negative rebase in second loop
+        - No LP holdings, so no change
+
+    - Calculating refund in third loop
+        - refund_per_user[0x2eA1815B01067f68EF87895E0467A619340d5c8A] = 0 - 0 = $0
+
+    - Spreadsheet claims that this address is owed $185.98, but this address should be owed $0
+
+Example 2 (0xDB6AbcfE6913c1b296dF2970d3b57A9B431D1680):
+    - Initially had 0 USD+
+        - usd_holdings_per_address[0xDB6AbcfE6913c1b296dF2970d3b57A9B431D1680] = 0
+
+    - Transactions in first loop:
+        - Removed LP receiving 27,537.176445 USD+
+            - usd_holdings_per_address[0xDB6AbcfE6913c1b296dF2970d3b57A9B431D1680] = 0 + 27,537.176445 = 27,537.176445
+        - Received 371.957836 USD+ from another address
+            - usd_holdings_per_address[0xDB6AbcfE6913c1b296dF2970d3b57A9B431D1680] = 27,537.176445 + 371.957836 = 27,909.134281
+
+    - Checking LP holdings before negative rebase in second loop
+        - No LP holdings, so no change
+
+    - Calculating refund in third loop
+        - refund_per_user[0xDB6AbcfE6913c1b296dF2970d3b57A9B431D1680] = 27,909.134281 - 4355.815119 = 23,553.319162
+
+    - Spreadsheet claims that this address is owed $13,954.57, but it should be owed $23,553.32
+
+Example 3 (0x10c5Af029f42579Da7CDcaEE1eF31AeA624F12fE):
+    - Initially had 2096.769860 USD+
+        - usd_holdings_per_address[0x10c5Af029f42579Da7CDcaEE1eF31AeA624F12fE] = 2096.769860
+
+    - Transactions in first loop:
+        - Removed LP receiving 1,315.777647 USD+
+            - usd_holdings_per_address[0x10c5Af029f42579Da7CDcaEE1eF31AeA624F12fE] = 2096.769860 + 1,315.777647 = 3,412.547507
+        - Removed LP receiving 296.56305 USD+
+            - usd_holdings_per_address[0x10c5Af029f42579Da7CDcaEE1eF31AeA624F12fE] = 3,412.547507 + 296.56305 = 3,709.110557
+
+    - Checking LP holdings before negative rebase in second loop
+        - No LP holdings, so no change
+
+    - Calculating refund in third loop
+        - refund_per_user[0x10c5Af029f42579Da7CDcaEE1eF31AeA624F12fE] = 3,709.110557 - 578.88574 = 3,130.224817
+
+    - Spreadsheet claims that this address is owed $2,902.94, but it should be owed $3,130.22
+
+Example 4 (0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3):
+    - Initially had 87.930236 USD+
+        - usd_holdings_per_address[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 87.930236
+
+    - Transactions in first loop:
+        - No transactions, so no change
+
+    - Checking LP holdings before negative rebase in second loop
+        - sd_holdings_per_address[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 87.930236 + 2.144418 = 90.074654
+
+    - Calculating refund in third loop
+        - refund_per_user[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 90.074654 - 14.058069 = 76.016585
+
+    - Spreadsheet claims that this address is owed $89.48, but it should be owed $76.02
