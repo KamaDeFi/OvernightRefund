@@ -1,0 +1,55 @@
+// usd_holdings_per_address is the dollar amount that each address has before the negative rebase
+let usd_holdings_per_address = map(address => amount)
+
+<fill usd_holdings_per_address with the amount of USD+ that each address has in the block before the announcement>
+
+let transactions = <all USD+ transactions in chronlogical order from block before announcement until block before negative rebase>
+
+for each transaction in transactions {
+
+    if transaction is <transfer USD+> {
+        let transfer_from_address = <the address that is transferring the USD+>
+        let transer_to_address = <the address that the USD+ was transferred to>
+        let transfer_amount = <amount of USD+ that was transferred>
+        usd_holdings_per_address[transfer_from_address] -= transfer_amount
+        usd_holdings_per_address[transer_to_address] += transfer_amount
+    }
+
+    if transaction is <add USD+ liquidity> {
+        let address = <the address adding the USD+ liquidity>
+        let usd_plus_added = <the USD+ amount added to the LP>
+        usd_holdings_per_address[address] -= usd_plus_added
+    }
+
+    if transaction is <remove USD+ liquidity> {
+        let address = <the address removing the USD+ liquidity>
+        let usd_plus_removed = <the USD+ amount removed from the LP>
+        usd_holdings_per_address[address] += usd_plus_removed
+    }
+
+    if transaction is <buy USD+> {
+        let address = <the address buying the USD+>
+        let usd_sold = <the dollar value of the token that was used to buy USD+>
+        usd_holdings_per_address[address] += usd_sold
+    }
+
+    if transaction is <sell USD+> {
+        let address = <the address selling the USD+>
+        let usd_bought = <the dollar value of the token that was bought with the sold USD+>
+        usd_holdings_per_address[address] -= usd_bought
+    }
+
+}
+
+for each address in usd_holdings_per_address {
+    let usd_plus_in_lps = <the amount of USD+ owned by address in all liquidity pools in the block just before the negative rebase>
+    usd_holdings_per_address[address] += usd_plus_in_lps
+}
+
+// refund_per_user is the dollar amount owed to each addresses
+let refund_per_user = map(address => amount)
+
+for each address in usd_holdings_per_address {
+    let usd_plus_amount = <the amount of USD+ owned by address directly and in all liquidity pools in the block of the negative rebase>
+    refund_per_user[address] = usd_holdings_per_address[address] - usd_plus_amount
+}
