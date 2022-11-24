@@ -74,15 +74,17 @@ Example 5 (fictional_address_0):
             - usd_holdings_per_address[fictional_address_0] = 100 - 20 = 80
         - Sold $10, bought 60 USD+
             - usd_holdings_per_address[fictional_address_0] = 80 + 10 = 90
+        - Transfers 10 USD+ to another address
+            - usd_holdings_per_address[fictional_address_0] = 90 - 10 = 80
 
     - Checking LP holdings before negative rebase in second loop
         - No LP holdings, so no change
 
     - Calculating refund in third loop
-        - refund_per_user[fictional_address_0] = 90 - 14.046417 = 75.953583
+        - refund_per_user[fictional_address_0] = 80 - 12.485704 = 67.514296
 
-    - This address is owed $75.95
-    - This makes sense because they originally had 100 USD+ before the announcement and $10 that they used to buy the extra USD+
-    - After everything, they managed to end up with $20 from the sell transaction and 14.046417 USD+ after the negative rebase
-    - So therefore they lost 100 + 10 - 20 - 14.046417 = $75.953583
-    - Which is the exact amount that the code said they should be refunded!
+    - This address is owed $67.51
+    - This makes sense because they originally had 100 USD+ before the announcement and $10 that they used to buy the extra USD+, but they transferred 10 USD+ to another address
+    - After everything, they managed to end up with $20 from the sell transaction and 12.485704 USD+ after the negative rebase
+    - So therefore they lost 100 + 10 - 10 - 20 - 12.485704 = 67.514296
+    - Which is the exact amount that the code said they lost!
