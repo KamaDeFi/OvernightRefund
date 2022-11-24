@@ -88,3 +88,19 @@ Example 5 (fictional_address_0):
     - After everything, they managed to end up with $20 from the sell transaction and 12.485704 USD+ after the negative rebase
     - So therefore they lost 100 + 10 - 10 - 20 - 12.485704 = 67.514296
     - Which is the exact amount that the code said they lost!
+
+Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
+    - Initially had 121.720013 USD+
+        - usd_holdings_per_address[0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d] = 121.720013
+
+    - Transactions in first loop:
+        - Removed LP receiving 4,163.876345 USD+
+            - usd_holdings_per_address[0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d] = 121.720013 + 4,163.876345 = 4,285.596358
+
+    - Checking LP holdings before negative rebase in second loop
+        - No LP holdings, so no change
+
+    - Calculating refund in third loop
+        - refund_per_user[0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d] = 4,285.596358 - 668.858633 = 3,616.737725
+
+    - Spreadsheet claims that this address is owed $2,203.66, but it should be owed $3,616.74
