@@ -85,4 +85,4 @@ Example 5 (fictional_address_0):
     - This makes sense because they originally had 100 USD+ before the announcement and $10 that they used to buy the extra USD+
     - After everything, they managed to end up with $20 from the sell transaction and 14.046417 USD+ after the negative rebase
     - So therefore they lost 100 + 10 - 20 - 14.046417 = $75.953583
-    - Which is the exact amount that the code said they lost!
+    - Which is the exact amount that the code said they should be refunded!
