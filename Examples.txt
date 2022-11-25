@@ -66,20 +66,29 @@ Example 4 (0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3):
     - Spreadsheet claims that this address is owed $89.48, but it should be owed $76.02
 
 Example 5 (fictional_address_0):
-    - Initially had 100 USD+
+    - Initially had 100 USD+, and an LP containing 30 USD+ / 30 BUSD
+        - At this stage, 1 USD+ = $1, so we put 100 directly in usd_holdings_per_address[fictional_address_0]
+        - We do not take into account any LPs at this stage, so that is why we only put 100 for now
         - usd_holdings_per_address[fictional_address_0] = 100
 
     - Transactions in first loop:
         - Sold 50 USD+, bought $20 worth of BNB
+            - At this stage, 1 USD+ is not equal to $1. Therefore, we use the dollar value of the transaction
+            - The user gains $20 worth of BNB in the transaction, and so this $20 can be removed
             - usd_holdings_per_address[fictional_address_0] = 100 - 20 = 80
         - Sold $10 worth of MDB+, bought 60 USD+
+            - Again, 1 USD+ is not equal to $1, so we use the dollar value of the transaction
+            - The user "loses" $10 of MDB+ to buy the USD+, and so that $10 need to be added to the refund
             - usd_holdings_per_address[fictional_address_0] = 80 + 10 = 90
         - Transfers 10 USD+ to another address
+            - This 10 USD+ is transferred to another address, so the refund corresponding to it should not be calculated for fictional_address_0
+            - This is just like the user starting out at the beginning with 100 - 10 = 90 USD+. So we simply subtract it
             - usd_holdings_per_address[fictional_address_0] = 90 - 10 = 80
 
     - Checking LP holdings before negative rebase in second loop
-        - Assume in this example, that in the block just before the negative rebase, the user owns LP tokens that have 50 USD+
-            - usd_holdings_per_address[fictional_address_0] = 80 + 50 = 130
+        - Now that this is the block just before the negative rebase, we should include the LP tokens
+        - In this example, the LP now contains 50 USD+ / 10 BUSD, and we can safely add the 50 USD+
+        - usd_holdings_per_address[fictional_address_0] = 80 + 50 = 130
 
     - Calculating refund in third loop
         - Just before the negative rebase, the user had 150 USD+ (started off with 100, sold 50, bought 60, transferred 10, and had 50 in LP tokens)
@@ -92,6 +101,9 @@ Example 5 (fictional_address_0):
     - After everything, they managed to end up with $20 from the sell transaction and 23.410696 USD+ after the negative rebase
     - So therefore they lost 100 + 10 + 50 - 10 - 20 - 23.410696 = 106.589304
     - Which is the exact amount that the code said they lost!
+    - Proving it a different way, at the beginning the user had 100 USD+, 10$ worth of MDB+ that they used to buy extra USD+, 30 USD+ in the LP, and 30 BUSD in the LP, but they transferred 10 USD+ to another address. So the total money they had in the start is 100 + 10 + 30+ 30 - 10 = $160
+    - After the negative rebase, the user has 20$ worth of BNB that he bought from selling USD+, 15.607130 USD+ in their address, 7.803565 USD+ in their LP, and 10 BUSD in their LP. So the total money they had after the negative rebase is 20 + 15.607130 + 7.803565 + 10 = $53.410695
+    - If we refund the user $106.59, then they would end up with $53.41 + $106.59 = $160, which is the exact dollar value they started with
 
 Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
     - Initially had 121.720013 USD+
