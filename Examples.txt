@@ -58,7 +58,7 @@ Example 4 (0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3):
         - No transactions, so no change
 
     - Checking LP holdings before negative rebase in second loop
-        - sd_holdings_per_address[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 87.930236 + 2.144418 = 90.074654
+        - usd_holdings_per_address[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 87.930236 + 2.144418 = 90.074654
 
     - Calculating refund in third loop
         - refund_per_user[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 90.074654 - 14.058069 = 76.016585
@@ -70,23 +70,27 @@ Example 5 (fictional_address_0):
         - usd_holdings_per_address[fictional_address_0] = 100
 
     - Transactions in first loop:
-        - Sold 50 USD+, bought $20
+        - Sold 50 USD+, bought $20 worth of BNB
             - usd_holdings_per_address[fictional_address_0] = 100 - 20 = 80
-        - Sold $10, bought 60 USD+
+        - Sold $10 worth of MDB+, bought 60 USD+
             - usd_holdings_per_address[fictional_address_0] = 80 + 10 = 90
         - Transfers 10 USD+ to another address
             - usd_holdings_per_address[fictional_address_0] = 90 - 10 = 80
 
     - Checking LP holdings before negative rebase in second loop
-        - No LP holdings, so no change
+        - Assume in this example, that in the block just before the negative rebase, the user owns LP tokens that have 50 USD+
+            - usd_holdings_per_address[fictional_address_0] = 80 + 50 = 130
 
     - Calculating refund in third loop
-        - refund_per_user[fictional_address_0] = 80 - 15.60713 = 64.39287
+        - Just before the negative rebase, the user had 150 USD+ (started off with 100, sold 50, bought 60, transferred 10, and had 50 in LP tokens)
+        - The negative rebase results in ~15.6% of the USD+, so in this example, 15.6% * 150 = 23.410696, which is the total USD+ the user has after the negative rebase (including the USD+ in LP tokens)
+        - usd_plus_amount = 23.410696
+        - refund_per_user[fictional_address_0] = 130 - 23.410696 = 106.589304
 
-    - This address is owed $64.39
-    - This makes sense because they originally had 100 USD+ before the announcement and $10 that they used to buy the extra USD+, but they transferred 10 USD+ to another address
-    - After everything, they managed to end up with $20 from the sell transaction and 15.60713 USD+ after the negative rebase
-    - So therefore they lost 100 + 10 - 10 - 20 - 15.60713 = 64.39287
+    - This address is owed $106.59
+    - This makes sense because they originally had 100 USD+ before the announcement and $10 that they used to buy the extra USD+, as well as 50 USD+ in LP tokens, but they transferred 10 USD+ to another address
+    - After everything, they managed to end up with $20 from the sell transaction and 23.410696 USD+ after the negative rebase
+    - So therefore they lost 100 + 10 + 50 - 10 - 20 - 23.410696 = 106.589304
     - Which is the exact amount that the code said they lost!
 
 Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
