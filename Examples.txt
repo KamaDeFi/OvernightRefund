@@ -101,13 +101,12 @@ Example 5 (fictional_address_0):
         - refund_per_user[fictional_address_0] = 130 - 23.410696 = 106.589304
 
     - Therefore, this address is owed $106.59
-    - This makes sense because they originally had 100 USD+ before the announcement and $10 that they used to buy the extra USD+, as well as 50 USD+ in LP tokens, but they transferred 10 USD+ to another address
-    - After everything, they managed to end up with $20 from the sell transaction and 23.410696 USD+ after the negative rebase
-    - So therefore they lost 100 + 10 + 50 - 10 - 20 - 23.410696 = 106.589304
-    - Which is the exact amount that the code said they lost!
-    - Proving it a different way, at the beginning the user had 100 USD+, 10$ worth of MDB+ that they used to buy extra USD+, 30 USD+ in the LP, and 30 BUSD in the LP, but they transferred 10 USD+ to another address. So the total money they had in the start is 100 + 10 + 30+ 30 - 10 = $160
-    - After the negative rebase, the user has 20$ worth of BNB that he bought from selling USD+, 15.607130 USD+ in their address, 7.803565 USD+ in their LP, and 10 BUSD in their LP. So the total money they had after the negative rebase is 20 + 15.607130 + 7.803565 + 10 = $53.410695
-    - If we refund the user $106.59, then they would end up with $53.41 + $106.59 = $160, which is the exact dollar value they started with
+    - This makes sense because they originally (before the announcement) had 100 USD+, $10 of MDB+ that they used to buy the extra USD+, and 50 USD+ in LP tokens. But they transferred 10 USD+ to another address
+    - After everything , they managed to end up with $20 from the sell transaction and 23.410696 USD+ after the negative rebase
+    - So therefore they lost 100 + 10 + 50 - 10 - 20 - 23.410696 = 106.589304, which is the exact amount that the code said they should be refunded
+    - Proving it a different way, at the beginning the user had 100 USD+, 10$ worth of MDB+ that they used to buy extra USD+, 30 USD+ in the LP, and 30 BUSD in the LP, but they transferred 10 USD+ to another address. So the total money he had in the start is 100 + 10 + 30 + 30 - 10 = $160
+    - After the negative rebase, the user has $20 worth of BNB that he bought from selling USD+, 15.607130 USD+ in their address after the negative rebase, and 7.803565 USD+ / 10 BUSD in their LP after the negative rebase. So the total money he had after the negative rebase is 20 + 15.607130 + 7.803565 + 10 = $53.41
+    - If we refund the user $106.59 as the code says, then they would end up with $53.41 + $106.59 = $160, which is the exact dollar value they started with
 
 Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
     - Initially had 121.720013 USD+
