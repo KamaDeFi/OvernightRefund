@@ -1,4 +1,4 @@
-// usd_holdings_per_address is the dollar value that each address has before the negative rebase
+// usd_holdings_per_address is the dollar value that each address has before the negative rebase.
 // It does not contain USD+ amount, because we care only about refund of dollar value, and during
 // the period between the announcement and the negative rebase, the value of 1 USD+ is not equal to $1.
 let usd_holdings_per_address = map(address => amount)
