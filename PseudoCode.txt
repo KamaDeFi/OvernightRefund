@@ -1,12 +1,30 @@
-// usd_holdings_per_address is the dollar amount that each address has before the negative rebase
+// usd_holdings_per_address is the dollar value that each address has before the negative rebase
+// It does not contain USD+ amount, because we care only about refund of dollar value, and during
+// the period between the announcement and the negative rebase, the value of 1 USD+ is not equal to $1.
 let usd_holdings_per_address = map(address => amount)
 
+// At this point before the announcement, 1 USD+ = $1, so we use the amount of USD+ in each address
+// to fill usd_holdings_per_address.
+// A couple of important notes:
+//   1. We don't calculate the USD+ in liqudity pools at this point. We will calculate that later.
+//      The reason is that the USD+ in the LPs will change during this period as people buy and sell USD+.
+//   2. We need to exclude the addresses that are used to stake LP tokens from usd_holdings_per_address.
+//      This means we need to exclude the Cone and Unknown LP staking addresses.
 <fill usd_holdings_per_address with the amount of USD+ that each address has in the block before the announcement>
 
+// These are basically all the transactions from the snapshot block until the block just before the negative rebase
+// that involve USD+ moving from one address to another:
+//   1. USD+ transfers.
+//   2. Adding USD+ liquidity.
+//   3. Removing USD+ liquidity.
+//   4. Buying USD+.
+//   5. Selling USD+.
 let transactions = <all USD+ transactions in chronlogical order from block before announcement until block before negative rebase>
 
 for each transaction in transactions {
 
+    // This case is the simplest. If USD+ is transferred from one address to another, then the relevant refund
+    // for that USD+ should only be calculated for the receiving address and not the sending address.
     if transaction is <transfer USD+> {
         let transfer_from_address = <the address that is transferring the USD+>
         let transer_to_address = <the address that the USD+ was transferred to>
@@ -15,24 +33,38 @@ for each transaction in transactions {
         usd_holdings_per_address[transer_to_address] += transfer_amount
     }
 
+    // This case is not expected to happen as it is very unlikely that anyone decided to add USD+ liqudity,
+    // but we should write the code for it anyways for completeness.
+    // When someone adds USD+ liquidity, we remove it from the calculation. We will add it back later. The reason
+    // is the same as that mentioned above, which is that the USD+ in the LPs will change during this period
+    // as people buy and sell USD+.
     if transaction is <add USD+ liquidity> {
         let address = <the address adding the USD+ liquidity>
         let usd_plus_added = <the USD+ amount added to the LP>
         usd_holdings_per_address[address] -= usd_plus_added
     }
 
+    // If someone removes liquidity, then we can now safely add the USD+ that was removed.
     if transaction is <remove USD+ liquidity> {
         let address = <the address removing the USD+ liquidity>
         let usd_plus_removed = <the USD+ amount removed from the LP>
         usd_holdings_per_address[address] += usd_plus_removed
     }
 
+    // As mentioned above, usd_holdings_per_address is supposed to hold the dollar value of each address,
+    // not the USD+ amount. That is why we add the dollar value of the token used to buy USD+, and not the
+    // amount of USD+ that was bought. So for example, if someone uses $100 worth of BNB to buy 500 USD+,
+    // we will add 100 to usd_holdings_per_address[address] and not 500.
     if transaction is <buy USD+> {
         let address = <the address buying the USD+>
         let usd_sold = <the dollar value of the token that was used to buy USD+>
         usd_holdings_per_address[address] += usd_sold
     }
 
+    // Same as above, we use the dollar value of the transaction. If someone sells 500 USD+ to buy $100 of BNB,
+    // we do usd_holdings_per_address[address] -= 100 (not 500). The logic behind this is that the user was able
+    // to acquire that dollar value from this sell transaction, so we should remove it from the calculations by
+    // subtracting it from usd_holdings_per_address[address].
     if transaction is <sell USD+> {
         let address = <the address selling the USD+>
         let usd_bought = <the dollar value of the token that was bought with the sold USD+>
@@ -41,14 +73,26 @@ for each transaction in transactions {
 
 }
 
+// Now here we take into account any LP tokens that users still have. This is for the people that did not manage
+// to remove their LPs before the negative rebase.
+// In the block just before the negative rebase, we add up all the USD+ in the LPs owned by the user, and add it
+// to usd_holdings_per_address.
+// Important note: we should take into account the LP tokens the user is holding directly, as well as the LP tokens
+// that are staked into Cone and Unknown.
 for each address in usd_holdings_per_address {
     let usd_plus_in_lps = <the amount of USD+ owned by address in all liquidity pools in the block just before the negative rebase>
     usd_holdings_per_address[address] += usd_plus_in_lps
 }
 
-// refund_per_user is the dollar amount owed to each addresses
+// refund_per_user is the dollar value owed to each address.
 let refund_per_user = map(address => amount)
 
+// Finally here, we calculate the refund owed to each user.
+// In the block of the negative rebase, we get the USD+ amount that each address owns. That is:
+//   1. The USD+ directly in their address.
+//   2. The USD+ in their LPs, including the LPs staked in Cone and Unknown.
+// That is usd_plus_amount. Then we simply subtract that from usd_holdings_per_address[address] to get the final
+// refund dollar value owed to each address.
 for each address in usd_holdings_per_address {
     let usd_plus_amount = <the amount of USD+ owned by address directly and in all liquidity pools in the block of the negative rebase>
     refund_per_user[address] = usd_holdings_per_address[address] - usd_plus_amount
