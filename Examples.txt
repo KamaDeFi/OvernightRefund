@@ -78,7 +78,7 @@ Example 5 (fictional_address_0):
             - usd_holdings_per_address[fictional_address_0] = 100 - 20 = 80
         - Sold $10 worth of MDB+, bought 60 USD+
             - Again, 1 USD+ is not equal to $1, so we use the dollar value of the transaction
-            - The user "loses" $10 of MDB+ to buy the USD+, and so that $10 need to be added to the refund
+            - The user "loses" $10 of MDB+ to buy the USD+, and so that $10 needs to be added to the refund
             - usd_holdings_per_address[fictional_address_0] = 80 + 10 = 90
         - Transfers 10 USD+ to another address
             - This 10 USD+ is transferred to another address, so the refund corresponding to it should not be calculated for fictional_address_0
@@ -120,3 +120,52 @@ Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
         - refund_per_user[0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d] = 4,285.596358 - 668.858633 = 3,616.737725
 
     - Spreadsheet claims that this address is owed $2,203.66, but it should be owed $3,616.74
+
+Example 7 (fictional_address_1):
+    - Initially had 0 USD+
+        - usd_holdings_per_address[fictional_address_1] = 0
+
+    - Transactions in first loop:
+        - Sold $100 worth of BNB, bought 500 USD+
+            - 1 USD+ is not equal to $1, so we use the dollar value of the transaction
+            - The user "loses" $100 of BNB to buy the USD+, and so that $100 needs to be added to the refund
+            - usd_holdings_per_address[fictional_address_1] = 0 + 100 = 100
+
+    - Checking LP holdings before negative rebase in second loop
+        - No LP holdings, so no change
+
+    - Calculating refund in third loop
+        - Just before the negative rebase, the user had 500 USD+ (started off with 0, and then bought 500)
+        - That is the USD+ amount owned by the user and not the dollar value. It is not relevant to the calculations, but this is just to demonstrate where the 78.035653 in the next line comes from
+        - The negative rebase results in ~15.6% of the USD+, so in this example, 15.6% * 500 = 78.035653, which is the total USD+ the user has after the negative rebase
+        - All of the above is just to explain where the 78.035653 comes from. In this section, the code should get the USD+ amount owned by the user after the negative rebase from the blockchain directly
+        - usd_plus_amount = 78.035653
+        - refund_per_user[fictional_address_1] = 100 - 78.035653 = 21.964347
+
+    - Therefore, this address is owed $21.96
+    - This makes sense because they originally (before the announcement) had 100$ worth of BNB that they used to buy the USD+
+    - After the negative rebase, the user has 78.035653 USD+ in their address. So the total money he had after the negative rebase is $78.04
+    - If we refund the user $21.96 as the code says, then they would end up with $78.04 + $21.96 = $100, which is the exact dollar value they started with
+
+Example 8 (fictional_address_2):
+    - Initially had 100 USD+
+        - usd_holdings_per_address[fictional_address_2] = 100
+
+    - Transactions in first loop:
+        - Sold 100 USD+, bought $20 worth of BNB
+            - 1 USD+ is not equal to $1, so we use the dollar value of the transaction
+            - The user gains $20 worth of BNB in the transaction, and so this $20 can be removed
+            - usd_holdings_per_address[fictional_address_0] = 100 - 20 = 80
+
+    - Checking LP holdings before negative rebase in second loop
+        - No LP holdings, so no change
+
+    - Calculating refund in third loop
+        - Just before the negative rebase, the user had 0 USD+
+        - usd_plus_amount = 0
+        - refund_per_user[fictional_address_1] = 80 - 0 = 80
+
+    - Therefore, this address is owed $80
+    - This makes sense because they originally (before the announcement) had 100 USD+ (which is $100)
+    - After the negative rebase, the user has 0 USD+ in their address and $20 worth of BNB that they got from the sell transaction. So the total money he had after the negative rebase is $20
+    - If we refund the user $80 as the code says, then they would end up with $20 + $80 = $100, which is the exact dollar value they started with
