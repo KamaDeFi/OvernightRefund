@@ -285,6 +285,39 @@ async function processTransaction(result) {
         row += '0,' + bigIntMax(busdTransfers).toString(10) + ',Bought USD+\n';
     }
 
+    // This is a transaction where someone is buying USD+ using USDC through the USD+/BUSD LP.
+    // 0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F is the Cone Router contract
+    // 0xf41766d8 is the swapExactTokensForTokens(uint256,uint256,(address,address,bool)[],address,uint256) function selector
+    // 8ac76a51cc950d9822d68b83fe1ad97b32cd580d is the USDC contract
+    // e9e7cea3dedca5984780bafc599bd69add087d56 is the BUSD contract
+    // e80772eaf6e2e18b651f160bc9158b2a5cafca65 is the USD+ contract
+    // 1 means this is a Cone stable pool
+    // 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef is the Transfer(address indexed from, address indexed to, uint256 value) event
+    else if (txn.to == '0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F' &&
+             txn.input.startsWith('0xf41766d8') &&
+             txn.input.length == 778 &&
+             txn.input.substr(226, 40) == txn.from.substr(2).toLowerCase() &&
+             txn.input.substr(418, 40) == '8ac76a51cc950d9822d68b83fe1ad97b32cd580d' &&
+             txn.input.substr(482, 40) == 'e9e7cea3dedca5984780bafc599bd69add087d56' &&
+             txn.input.substr(674, 40) == 'e80772eaf6e2e18b651f160bc9158b2a5cafca65' &&
+             txn.input.substr(585, 1) == '1' &&
+             txn.input.substr(777, 1) == '1') {
+        const receipt = await web3.eth.getTransactionReceipt(result.transactionHash);
+        let usdcTransfers = 0;
+        for (let i = 0; i < receipt.logs.length; i++) {
+            if (receipt.logs[i].address == '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' &&
+                receipt.logs[i].topics[0] == '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef') {
+                usdcTransfers++;
+                if (usdcTransfers == 1) {
+                    row += '0,' + BigInt(receipt.logs[i].data).toString(10) + ',Bought USD+\n';
+                }
+            }
+        }
+        if (usdcTransfers != 2) {
+            console.error('Txn ' + result.transactionHash + ' has an unexpected number of USDC transfers!');
+        }
+    }
+
     // This is for REIGN protocol buy/sell transactions.
     // 0xdEC068b3a229c2b8EEa394FeAf7B48ee57F7222F is the REIGN protocol contract
     // 0x977bc1f72e41e9072b2e219f034ebe63c54fffe5 is the REIGN/USD+ LP contract
