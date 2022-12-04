@@ -132,6 +132,43 @@ async function processTransaction(result) {
         }
     }
 
+    // This is a transaction where someone is selling USD+ to TETU through the TETU/USD+ LP.
+    // 0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F is the Cone Router contract
+    // 0xf41766d8 is the swapExactTokensForTokens(uint256,uint256,(address,address,bool)[],address,uint256) function selector
+    // e80772eaf6e2e18b651f160bc9158b2a5cafca65 is the USD+ contract
+    // 1f681b1c4065057e07b95a1e5e504fb2c85f4625 is the TETU contract
+    // 0 means this is a Cone volatile pool
+    // 0x0f8c95890b7bdecfae7990bf32f22120111e0b44 is the TETU/USD+ LP contract
+    // 1705 / 100000 is the dollar price of TETU
+    else if (txn.to == '0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F' &&
+             txn.input.startsWith('0xf41766d8') &&
+             txn.input.length == 586 &&
+             txn.input.substr(226, 40) == txn.from.substr(2).toLowerCase() &&
+             txn.input.substr(418, 40) == 'e80772eaf6e2e18b651f160bc9158b2a5cafca65' &&
+             txn.input.substr(482, 40) == '1f681b1c4065057e07b95a1e5e504fb2c85f4625' &&
+             txn.input.substr(585, 1) == '0') {
+        if (toAddress == '0x0f8c95890b7bdecfae7990bf32f22120111e0b44') {
+            let printed = false;
+            const receipt = await web3.eth.getTransactionReceipt(result.transactionHash);
+            for (let i = 0; i < receipt.logs.length; i++) {
+                if (receipt.logs[i].address == '0x1f681B1c4065057E07b95a1E5e504fB2c85F4625') {
+                    if (printed) {
+                        console.error('Txn ' + result.transactionHash + ' printed more than once!');
+                    }
+                    row += '-' + (BigInt(receipt.logs[i].data) * BigInt(1705) / BigInt(100000)).toString(10) + ',0,Sold USD+\n';
+                    printed = true;
+                }
+            }
+            if (!printed) {
+                console.error('Txn ' + result.transactionHash + ' never printed!');
+            }
+        } else if (fromAddress == '0x0f8c95890b7bdecfae7990bf32f22120111e0b44') {
+            row += '0,' + amount + ',Removed USD+ liquidity\n';
+        } else {
+            console.error('Txn ' + result.transactionHash + ' contains an unexpected transfer!');
+        }
+    }
+
     // This is a transaction where someone is selling USD+ to USDT through the USD+/BUSD LP.
     // 0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F is the Cone Router contract
     // 0xf41766d8 is the swapExactTokensForTokens(uint256,uint256,(address,address,bool)[],address,uint256) function selector
