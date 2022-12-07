@@ -442,11 +442,14 @@ async function processTransaction(result, unknownPool, gaugePool, lp) {
     else if (fromAddress == '0x0000000000000000000000000000000000000000' && toAddress == TETU_PROXY_ADDRESS[lp]) {
     }
 
+    // 0x977bc1f72e41e9072b2e219f034ebe63c54fffe5 is the PancakeSwap LP token. Don't apply this rule
+    // to it as it should only apply to Cone LP tokens.
     // Ignore Cone stake/unstake transactions like:
     // https://bscscan.com/tx/0x13b31472c2f3271521452371222605589d81671ec9431d963c77885618a95280
     // https://bscscan.com/tx/0xb986203f8d3d30d715a46dbf40dfc60414db6d8677bc8459a8ffff7795492c4e
     // https://bscscan.com/tx/0xae136368da1054e8c80b3b02b3ee4776a654396243689014ec4ce6975569dffe
-    else if (fromAddress == gaugePool || toAddress == gaugePool) {
+    else if (lp != '0x977bc1f72e41e9072b2e219f034ebe63c54fffe5' &&
+             (fromAddress == gaugePool || toAddress == gaugePool)) {
     }
 
     // Zapping to Beefy.
