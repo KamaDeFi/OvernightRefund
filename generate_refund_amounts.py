@@ -30,10 +30,10 @@ with open('user_usd_plus_in_lps_22742225.csv', mode='r') as csvfile:
         usd_holdings_per_address[row['Holder']] -= int(row['Amount'])
 
 total = 0
-with open('refund.csv', mode='w') as csvfile:
+with open('refund.csv', mode='w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile, delimiter=',')
     csv_writer.writerow(['Address', 'Amount'])
     for address, amount in usd_holdings_per_address.items():
         csv_writer.writerow([address, '$' + str(round(float(amount) / 10**18, 2))])
         total += round(float(amount) / 10**18, 2)
-print('Total refund is $' + str(total))
+print('Total refund is $' + str(round(total, 2)))
