@@ -34,6 +34,10 @@ fetch('https://api.bscscan.com/api?module=logs&action=getLogs&fromBlock=22720066
 // Global variable to make our lives easier for transaction that have a USD+ transfer that is a sell fee.
 let nextTransactionIsSellFee = false;
 
+// Global variables to make our lives easier for REIGN protocol transactions.
+let reignBuy = '';
+let reignSell = '';
+
 // Prints all the transactions that involve USD+ being transferred in a CSV file.
 async function printTransactionsToCSV(response) {
     let transactions = [];
@@ -322,6 +326,35 @@ async function processTransaction(result) {
         row += '0,' + bigIntMax(busdTransfers).toString(10) + ',Bought USD+\n';
     }
 
+    // This is a transaction where someone is buying USD+ using TETU through the TETU/USD+ LP.
+    // 0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F is the Cone Router contract
+    // 0xf41766d8 is the swapExactTokensForTokens(uint256,uint256,(address,address,bool)[],address,uint256) function selector
+    // 1f681b1c4065057e07b95a1e5e504fb2c85f4625 is the TETU contract
+    // e80772eaf6e2e18b651f160bc9158b2a5cafca65 is the USD+ contract
+    // 0 means this is a Cone volatile pool
+    // 1705 / 100000 is the dollar price of TETU
+    // 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef is the Transfer(address indexed from, address indexed to, uint256 value) event
+    else if (txn.to == '0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F' &&
+             txn.input.startsWith('0xf41766d8') &&
+             txn.input.length == 586 &&
+             txn.input.substr(226, 40) == txn.from.substr(2).toLowerCase() &&
+             txn.input.substr(418, 40) == '1f681b1c4065057e07b95a1e5e504fb2c85f4625' &&
+             txn.input.substr(482, 40) == 'e80772eaf6e2e18b651f160bc9158b2a5cafca65' &&
+             txn.input.substr(585, 1) == '0') {
+        const receipt = await web3.eth.getTransactionReceipt(result.transactionHash);
+        let tetuTransfers = [];
+        for (let i = 0; i < receipt.logs.length; i++) {
+            if (receipt.logs[i].address == '0x1f681B1c4065057E07b95a1E5e504fB2c85F4625' &&
+                receipt.logs[i].topics[0] == '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef') {
+                    tetuTransfers.push(BigInt(receipt.logs[i].data));
+            }
+        }
+        if (tetuTransfers.length != 2) {
+            console.error('Txn ' + result.transactionHash + ' has an unexpected number of TETU transfers!');
+        }
+        row += '0,' + (bigIntMax(tetuTransfers) * BigInt(1705) / BigInt(100000)).toString(10) + ',Bought USD+\n';
+    }
+
     // This is a transaction where someone is buying USD+ using USDC through the USD+/BUSD LP.
     // 0xbf1fc29668e5f5Eaa819948599c9Ac1B1E03E75F is the Cone Router contract
     // 0xf41766d8 is the swapExactTokensForTokens(uint256,uint256,(address,address,bool)[],address,uint256) function selector
@@ -360,13 +393,37 @@ async function processTransaction(result) {
     // 0x977bc1f72e41e9072b2e219f034ebe63c54fffe5 is the REIGN/USD+ LP contract
     else if (txn.to == '0xdEC068b3a229c2b8EEa394FeAf7B48ee57F7222F') {
         if (fromAddress == '0x977bc1f72e41e9072b2e219f034ebe63c54fffe5') {
+            if (result.transactionHash != reignBuy && result.transactionHash != reignSell) {
+                reignBuy = result.transactionHash;
+                reignSell = '';
+            } else {
+                console.error('Txn ' + result.transactionHash + ' contains an unexpected REIGN protocol transfer from the LP!');
+            }
             row += '0,' + amount + ',Bought USD+\n';
-        } else if (toAddress == '0x977bc1f72e41e9072b2e219f034ebe63c54fffe5') {
-            row += '-' + amount + ',0,Sold USD+\n';
-        } else if (fromAddress == '0xdec068b3a229c2b8eea394feaf7b48ee57f7222f') {
-            row += '-' + amount + ',' + amount + ',Transferred USD+\n';
         } else if (toAddress == '0xdec068b3a229c2b8eea394feaf7b48ee57f7222f') {
+            if (result.transactionHash != reignBuy && result.transactionHash != reignSell) {
+                reignBuy = '';
+                reignSell = result.transactionHash;
+            } else {
+                console.error('Txn ' + result.transactionHash + ' contains an unexpected REIGN protocol transfer to the protocol!');
+            }
             row += '-' + amount + ',0,Sold USD+\n';
+        } else if (toAddress == '0x977bc1f72e41e9072b2e219f034ebe63c54fffe5') {
+            if (result.transactionHash == reignBuy) {
+                row += '-' + amount + ',0,Sold USD+\n';
+            } else if (result.transactionHash == reignSell) {
+                row += '0,0,Internal LP transfer\n';
+            } else {
+                console.error('Txn ' + result.transactionHash + ' contains an unexpected REIGN protocol transfer to the LP!');
+            }
+        } else if (fromAddress == '0xdec068b3a229c2b8eea394feaf7b48ee57f7222f') {
+            if (result.transactionHash == reignBuy) {
+                row += '-' + amount + ',' + amount + ',Transferred USD+\n';
+            } else if (result.transactionHash == reignSell) {
+                row += '0,' + amount + ',Removed USD+ liquidity\n';
+            } else {
+                console.error('Txn ' + result.transactionHash + ' contains an unexpected REIGN protocol transfer from the protocol!');
+            }
         } else {
             console.error('Txn ' + result.transactionHash + ' contains an unexpected transfer!');
         }
