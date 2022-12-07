@@ -50,22 +50,7 @@ Example 3 (0x10c5Af029f42579Da7CDcaEE1eF31AeA624F12fE):
 
     - Spreadsheet claims that this address is owed $2,902.94, but it should be owed $3,130.22
 
-Example 4 (0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3):
-    - Initially had 87.930236 USD+
-        - usd_holdings_per_address[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 87.930236
-
-    - Transactions in first loop:
-        - No transactions, so no change
-
-    - Checking LP holdings before negative rebase in second loop
-        - usd_holdings_per_address[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 87.930236 + 2.144418 = 90.074654
-
-    - Calculating refund in third loop
-        - refund_per_user[0xe92a405AfA5F6a1B55F87F4BFF1Dd03bfcb144c3] = 90.074654 - 14.058069 = 76.016585
-
-    - Spreadsheet claims that this address is owed $89.48, but it should be owed $76.02
-
-Example 5 (fictional_address_0):
+Example 4 (fictional_address_0):
     - Initially had 100 USD+, and an LP containing 30 USD+ / 30 BUSD
         - At this stage, 1 USD+ = $1, so we put 100 directly in usd_holdings_per_address[fictional_address_0]
         - We do not take into account any LPs at this stage, so that is why we only put 100 for now
@@ -105,7 +90,7 @@ Example 5 (fictional_address_0):
     - After the negative rebase, the user has $20 worth of BNB that he bought from selling USD+, 15.607130 USD+ in their address after the negative rebase, and 7.803565 USD+ / 10 BUSD in their LP after the negative rebase. So the total money he had after the negative rebase is 20 + 15.607130 + 7.803565 + 10 = $53.41
     - If we refund the user $106.59 as the code says, then they would end up with $53.41 + $106.59 = $160, which is the exact dollar value they started with
 
-Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
+Example 5 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
     - Initially had 121.720013 USD+
         - usd_holdings_per_address[0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d] = 121.720013
 
@@ -121,7 +106,7 @@ Example 6 (0x5Bf64C6bbe1A0F3342B499c7F26B3Fa3EAd0CB0d):
 
     - Spreadsheet claims that this address is owed $2,203.66, but it should be owed $3,616.74
 
-Example 7 (fictional_address_1):
+Example 6 (fictional_address_1):
     - Initially had 0 USD+
         - usd_holdings_per_address[fictional_address_1] = 0
 
@@ -147,7 +132,7 @@ Example 7 (fictional_address_1):
     - After the negative rebase, the user has 78.035653 USD+ in their address. So the total money he had after the negative rebase is $78.04
     - If we refund the user $21.96 as the code says, then they would end up with $78.04 + $21.96 = $100, which is the exact dollar value they started with
 
-Example 8 (fictional_address_2):
+Example 7 (fictional_address_2):
     - Initially had 100 USD+
         - usd_holdings_per_address[fictional_address_2] = 100
 
