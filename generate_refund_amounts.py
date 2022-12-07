@@ -17,7 +17,7 @@ with open('all_usd_plus_transactions.csv', mode='r') as csvfile:
 with open('user_usd_plus_in_lps_22742224.csv', mode='r') as csvfile:
     csv_reader = csv.DictReader(csvfile, delimiter=',')
     for row in csv_reader:
-        usd_holdings_per_address[row['Address']] += int(row['Amount'])
+        usd_holdings_per_address[row['Holder']] += int(row['Amount'])
 
 with open('usd_plus_holders_block_22742225.csv', mode='r') as csvfile:
     csv_reader = csv.DictReader(csvfile, delimiter=',')
@@ -27,7 +27,7 @@ with open('usd_plus_holders_block_22742225.csv', mode='r') as csvfile:
 with open('user_usd_plus_in_lps_22742225.csv', mode='r') as csvfile:
     csv_reader = csv.DictReader(csvfile, delimiter=',')
     for row in csv_reader:
-        usd_holdings_per_address[row['Address']] -= int(row['Amount'])
+        usd_holdings_per_address[row['Holder']] -= int(row['Amount'])
 
 total = 0
 with open('refund.csv', mode='w') as csvfile:
