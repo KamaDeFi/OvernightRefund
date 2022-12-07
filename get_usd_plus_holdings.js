@@ -3,7 +3,7 @@ import Web3 from 'web3';
 
 const web3 = new Web3('https://bsc-dataseed.binance.org/');
 
-const BLOCK_NUMBER = 22720066;
+const BLOCK_NUMBER = 22742225;
 const USD_PLUS_CONTRACT = '0xe80772Eaf6e2E18B651F160Bc9158b2A5caFCA65';
 
 const LP_ADDRESSES = [
@@ -38,10 +38,11 @@ for (let i = 0; i < holdersSize; i++) {
     }
 
     const ownerAtData = '0x24359879' + iHex;
-    const holder = await web3.eth.call({
+    let holder = await web3.eth.call({
         to: USD_PLUS_CONTRACT,
         data: ownerAtData
     }, BLOCK_NUMBER);
+    holder = fixAddress(holder);
 
     if (LP_ADDRESSES.includes(holder)) {
         continue;
@@ -53,7 +54,7 @@ for (let i = 0; i < holdersSize; i++) {
         data: ownerBalanceAtData
     }, BLOCK_NUMBER);
 
-    holders[holder] = BigInt(balance).toString(10);
+    holders[holder] = (BigInt(balance) * BigInt(1000000000000)).toString(10);
 }
 
 let content = 'Address,Amount\n';
@@ -65,4 +66,8 @@ fs.writeFile('usd_plus_holders_block_' + BLOCK_NUMBER + '.csv', content, err => 
         console.error(err);
     }
 });
-  
+
+// Removes extra 12 bytes of 0 (24 '0' characters) at the beginning an address.
+function fixAddress(address) {
+    return '0x' + address.substr(26);
+}
